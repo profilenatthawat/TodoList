@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Home";
+}
+</br>
+<div class="row pt-5">
+    <div class="col-md-6">
+        <div class="card text-center border-0">
+            <div class="card-header bg-success">
+                <h1 class="text-white"><i class="fa-solid fa-list"></i> Todo List</h1>
+            </div>
+            <div class="card-body">
+                <table id="todotbl" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col" width="10%">#</th>
+                            <th scope="col" width="50%">Todo Lists</th>
+                            <th scope="col" width="15%">Date</th>
+                            <th scope="col" width="25%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int index = 1 ;}
+                        @foreach (var item in Model.lists)
+                        {
+                            <tr>
+                                <td>
+                                    @index
+                                </td>
+                                @{index++;}
+                                <td>
+                                    @item.list
+                                </td>
+                                <td>
+                                    @item.formatdate(item.finish_date)
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.id" class="btn btn-warning btn-sm">
+                                        <i class="fa fa-pen"></i>
+                                    </a>
+                                    <a type="button" class="btn btn-danger btn-sm text-dark" onclick=Delete('/Home/Delete/@item.id')>
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+    <div class="col-md-5">
+        <div class="card border-0">
+            <div class="card-header bg-warning text-center">
+                <h1 class="text-white"><i class="fa-solid fa-pencil"></i> Edit Todo List</h1>
+            </div>
+            <form method="post" asp-action="Edit" asp-controller="Home">
+                <input type="hidden" name="id" value="@Model.todolist.id">
+                <div class="card-body">
+                    <div class="form-group pt-2">
+                        <label class="form-label" for="">
+                            <h6>Todo List Topic</h6>
+                        </label>
+                        <input type="text" class="form-control" name="list" id="list" value="@Model.todolist.list" required>
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="form-label" for="">
+                            <h6>Finish Date</h6>
+                        </label>
+                        <input type="text" class="form-control" id="finishdate" name="finish_date">
+                        <input type="hidden" class="form-control" id="finishdate_hidden" value="@Model.format_finish">
+                    </div>
+
+                    <div class="form-group pt-2">
+                        <label class="form-label" for="priority_range">
+                            <h6>Priority</h6>
+                        </label>
+                    </div>
+                    <input type="range" class="form-control-range col-12" name="priority" min="1" max="3" step="1" value="@Model.todolist.priority"
+                        id="priority_range">
+                    <div class="row pt-2">
+                        <div class="col-4 text-start text-success">
+                            Less
+                        </div>
+                        
+                        <div class="col-4 text-center text-success">
+                            medium
+                        </div>
+                        
+                        <div class="col-4 text-end text-success">
+                            More
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer text-center">
+                    <button type="submit" class="btn btn-warning">Edit</button>
+                    <a asp-action="Index" class="btn btn-danger">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+<script type="text/javascript">
+    let date1 = $('#finishdate_hidden').val()
+    console.log(date1)
+    document.getElementById("finishdate").value = date1;
+
+    $(document).ready(function () {
+        $('#todotbl').DataTable({
+            searching: false,
+            lengthChange: false,
+            pageLength: 5,
+            ordering: false
+        });
+
+        $('#finishdate').pickadate({
+            format: 'dd/mm/yyyy',
+            formatSubmit: 'mm/dd/yyyy',
+            hiddenName: true
+        });
+    });
+
+    function Delete(url) {
+        Swal.fire({
+            title: 'Deleted',
+            text: "Are you sure to delete this todo list ?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Deleted Successfully !',
+                    'Your todo list has been deleted.',
+                    'success'
+                ).then((result) => {
+                    @* Ajax *@
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        success: (data) => {
+                            location.href = "/"
+                        }
+                    });
+                })
+            }
+        })
+    }
+</script>
+}
